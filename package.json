@@ -1,0 +1,13 @@
+{
+  "name": "tilt-card-delay",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Y.Zinchenko <zinchen777@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "babel-core": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "gulp-babel": "^7.0.0",
+    "gulp-sourcemaps": "^2.6.1"
+  }
+}

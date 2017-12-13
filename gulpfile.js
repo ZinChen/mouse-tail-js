@@ -11,10 +11,19 @@ var cleanCSS = require('gulp-clean-css');
 var browserSync = require('browser-sync').create();
 var plumber = require('gulp-plumber');
 var plumberNotifier = require('gulp-plumber-notifier');
+var sourcemaps = require('gulp-sourcemaps');
+var babel = require('gulp-babel');
+var concat = require('gulp-concat');
 
 gulp.task('js', function () {
   del('build/*.js');
   return gulp.src('./src/*.js')
+    .pipe(sourcemaps.init())
+    .pipe(babel({
+        presets: ['env']
+    }))
+    .pipe(concat('scripts.js'))
+    .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest('./build'))
 });
 
