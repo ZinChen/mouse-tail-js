@@ -1,51 +1,53 @@
-'use strict'
+class Tilt {
+  constructor(options) {
+    this.speedX;
+    this.speedY;
+    this.velocityX;
+    this.velocityY;
+    this.card = options.card;
+    this.shine = card.querySelector('.shine'),
+    this.moveOpt = {
+      card: {
+        t: 0,
+        r: 0.02
+      },
+      shine: {
+        t: 0.3,
+        r: 0
+      }
+    };
+    this.setMouseEventsOnCard();
+  }
 
-var Tilt = function(options) {
-  var speedX,
-      speedY,
-      velocityX,
-      velocityY;
+  handleMouseOver() {
 
-  var handleMouseOver = function() {
+  }
 
-  };
+  calcPosFromMiddle() {
 
-  var calcPosFromMiddle = function() {
+  }
 
-  };
+  setMouseEventsOnCard() {
+    this.card.addEventListener('mousemove', e => {
+      var mousepos = getMousePos();
+      var relmousepos = this.getRelativeMousePos(this.card, mousepos);
+      console.log(relmousepos);
+      this.setTransform(this.card, relmousepos, this.moveOpt.card);
+      this.setTransform(this.shine, relmousepos, this.moveOpt.shine);
+    });
 
-  var card = options.card,
-      shine = card.querySelector('.shine'),
-      moveOpt = {
-        card: {
-          t: 0,
-          r: 0.02
-        },
-        shine: {
-          t: 0.3,
-          r: 0
-        }
-      };
+    this.card.addEventListener('mouseleave', e => {
+      console.log('leave :');
+      console.log(e);
+    });
 
-  card.addEventListener('mousemove', function(e) {
-    var mousepos = getMousePos();
-    var relmousepos = getRelativeMousePos(card, mousepos);
-    console.log(relmousepos);
-    setTransform(card, relmousepos, moveOpt.card);
-    setTransform(shine, relmousepos, moveOpt.shine);
-  });
+    this.card.addEventListener('mouseenter', e => {
+      console.log('=> enter :');
+      console.log(e);
+    });
+  }
 
-  card.addEventListener('mouseleave', function(e) {
-    console.log('leave :');
-    console.log(e);
-  });
-
-  card.addEventListener('mouseenter', function(e) {
-    console.log('=> enter :');
-    console.log(e);
-  });
-
-  var getRelativeMousePos = function(el, mousepos) {
+  getRelativeMousePos(el, mousepos) {
     var bounds = el.getBoundingClientRect();
     var docScrolls = getDocScrolls();
     var relmousepos = {
@@ -58,7 +60,6 @@ var Tilt = function(options) {
     relmousepos.x -= halfX;
     relmousepos.y -= halfY;
 
-
     if (Math.abs(relmousepos.x) > halfX) {
       relmousepos.x = null;
     }
@@ -67,9 +68,9 @@ var Tilt = function(options) {
       relmousepos.y = null;
     }
     return relmousepos;
-  };
+  }
 
-  var setTransform = function(el, pos, opt) {
+  setTransform(el, pos, opt) {
     if ( !pos.x || !pos.y ) {
       return;
     }
@@ -95,19 +96,19 @@ var Tilt = function(options) {
 
     el.style.WebkitTransform =
     el.style.transform = transformStyle;
-  };
+  }
 
-  this.onMousemove = function() {
+  onMousemove() {
     var mousepos = getMousePos();
-    setTransform(card, mousepos, moveOpt.card);
-    setTransform(shine, mousepos, moveOpt.shine);
-  };
-};
+    this.setTransform(card, mousepos, this.moveOpt.card);
+    this.setTransform(shine, mousepos, this.moveOpt.shine);
+  }
+}
 
 // from http://www.quirksmode.org/js/events_properties.html#position
 function getMousePos(e) {
   var posx = 0, posy = 0;
-  if (!e) var e = window.event;
+  e = e || window.event;
   if (e.pageX || e.pageY) {
     posx = e.pageX;
     posy = e.pageY;
