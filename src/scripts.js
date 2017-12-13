@@ -22,16 +22,27 @@ var Tilt = function(options) {
           r: 0.02
         },
         shine: {
-          t: 0.5,
+          t: 0.3,
           r: 0
         }
       };
 
   card.addEventListener('mousemove', function(e) {
-    // console.log(e);
     var mousepos = getMousePos();
     var relmousepos = getRelativeMousePos(card, mousepos);
     console.log(relmousepos);
+    setTransform(card, relmousepos, moveOpt.card);
+    setTransform(shine, relmousepos, moveOpt.shine);
+  });
+
+  card.addEventListener('mouseleave', function(e) {
+    console.log('leave :');
+    console.log(e);
+  });
+
+  card.addEventListener('mouseenter', function(e) {
+    console.log('=> enter :');
+    console.log(e);
   });
 
   var getRelativeMousePos = function(el, mousepos) {
@@ -41,8 +52,8 @@ var Tilt = function(options) {
       x: mousepos.x - bounds.left - docScrolls.left,
       y: mousepos.y - bounds.top - docScrolls.top
     };
-    var halfX = bounds.width / 2
-    var halfY = bounds.bottom / 2;
+    var halfX = bounds.width / 2;
+    var halfY = bounds.height / 2;
 
     relmousepos.x -= halfX;
     relmousepos.y -= halfY;
@@ -59,14 +70,18 @@ var Tilt = function(options) {
   };
 
   var setTransform = function(el, pos, opt) {
+    if ( !pos.x || !pos.y ) {
+      return;
+    }
+
     var val = {
       t: {
-        x: (window.innerWidth / 2 - pos.x) * opt.t,
-        y: (window.innerHeight / 2 - pos.y) * opt.t
+        x: pos.x * opt.t,
+        y: pos.y * opt.t
       },
       r: {
-        x: (window.innerHeight / 2 - pos.y) * opt.r,
-        y: -1 * (window.innerWidth / 2 - pos.x) * opt.r
+        x: -1 * pos.y * opt.r,
+        y: pos.x * opt.r
       }
     },
     transformStyle = [
