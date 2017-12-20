@@ -1,9 +1,16 @@
 class Tale {
   constructor(options) {
-    this.speedX;
-    this.speedY;
+    this.speedx = 3;
+    this.speedy = 3;
+    this.talex;
+    this.taleY;
+    this.taleMaxistance = {
+      x: 30,
+      y: 30
+    };
     this.el = options.el;
     this.mouseCircle = this.el.querySelector('#mouse-circle');
+    this.mouseTale = this.el.querySelector('#mouse-tale');
     this.setMouseEvents();
   }
 
@@ -11,15 +18,30 @@ class Tale {
 
   }
 
+  moveTaleTo(pos) {
+    this.talex = this.talex || pos.x;
+    var xd = pos.x - this.talex;
+    var directionx = xd > 0 ? 1 : -1;
+    this.talex += Math.min(this.speedx, Math.abs(xd)) * directionx;
+
+    this.taley = this.taley || pos.y;
+    var yd = pos.y - this.taley;
+    var directiony = yd > 0 ? 1 : -1;
+    this.taley += Math.min(this.speedy, Math.abs(yd)) * directiony;
+  }
+
   setMouseEvents() {
-
-
     this.el.addEventListener('mousemove', e => {
       var mousepos = getMousePos();
       var circle = this.mouseCircle;
       circle.setAttribute("cx", mousepos.x);
       circle.setAttribute("cy", mousepos.y);
+      this.moveTaleTo(mousepos);
+      var tale = this.mouseTale;
+      tale.setAttribute("cx", this.talex);
+      tale.setAttribute("cy", this.taley);
       console.log(mousepos);
+      console.log(this.talex);
     });
 
     this.el.addEventListener('mouseleave', e => {
