@@ -4,6 +4,8 @@ class Tale {
     this.speedy = 3;
     this.talex;
     this.taleY;
+    this.x = 0;
+    this.y = 0;
     this.taleMaxistance = {
       x: 30,
       y: 30
@@ -12,22 +14,35 @@ class Tale {
     this.mouseCircle = this.el.querySelector('#mouse-circle');
     this.mouseTale = this.el.querySelector('#mouse-tale');
     this.setMouseEvents();
+
+    this.requestId = requestAnimationFrame(this.moveTale.bind(this));
   }
 
   handleMouseOver() {
 
   }
 
-  moveTaleTo(pos) {
-    this.talex = this.talex || pos.x;
-    var xd = pos.x - this.talex;
+// TODO:
+// Add request animation frame
+// Add initial first mouse pos setup for tale
+// Add limit distance to tale
+
+  moveTale() {
+    this.talex = this.talex || this.x;
+    var xd = this.x - this.talex;
     var directionx = xd > 0 ? 1 : -1;
     this.talex += Math.min(this.speedx, Math.abs(xd)) * directionx;
 
-    this.taley = this.taley || pos.y;
-    var yd = pos.y - this.taley;
+    this.taley = this.taley || this.y;
+    var yd = this.y - this.taley;
     var directiony = yd > 0 ? 1 : -1;
     this.taley += Math.min(this.speedy, Math.abs(yd)) * directiony;
+
+    var tale = this.mouseTale;
+    tale.setAttribute("cx", this.talex);
+    tale.setAttribute("cy", this.taley);
+
+    this.requestId = requestAnimationFrame(this.moveTale.bind(this));
   }
 
   setMouseEvents() {
@@ -36,10 +51,9 @@ class Tale {
       var circle = this.mouseCircle;
       circle.setAttribute("cx", mousepos.x);
       circle.setAttribute("cy", mousepos.y);
-      this.moveTaleTo(mousepos);
-      var tale = this.mouseTale;
-      tale.setAttribute("cx", this.talex);
-      tale.setAttribute("cy", this.taley);
+      // this.moveTaleTo(mousepos);
+      this.x = mousepos.x;
+      this.y = mousepos.y;
       console.log(mousepos);
       console.log(this.talex);
     });
