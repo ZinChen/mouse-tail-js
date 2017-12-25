@@ -1,125 +1,121 @@
 class Tale {
   constructor(options) {
-    this.speedx = 3;
-    this.speedy = 3;
-    this.talex;
-    this.taleY;
-    this.x = 0;
-    this.y = 0;
-    this.taleMaxistance = {
-      x: 30,
-      y: 30
-    };
     this.el = options.el;
+    this.tale = {
+      el: this.el.querySelector('#mouse-tale'),
+      x: 0,
+      y: 0,
+      speed: 3,
+      maxDistance: 30
+    };
+    this.tale2 = {
+      el: this.el.querySelector('#mouse-tale2'),
+      x: 0,
+      y: 0,
+      speed: 4,
+      maxDistance: 30
+    };
+    this.tale3 = {
+      el: this.el.querySelector('#mouse-tale3'),
+      x: 0,
+      y: 0,
+      speed: 5,
+      maxDistance: 30
+    };
+    this.coords = {
+      x: 0,
+      y: 0
+    };
     this.mouseCircle = this.el.querySelector('#mouse-circle');
-    this.mouseTale = this.el.querySelector('#mouse-tale');
     this.setMouseEvents();
-
-    this.requestId = requestAnimationFrame(this.moveTale.bind(this));
-  }
-
-  handleMouseOver() {
-
   }
 
 // TODO:
 // Add request animation frame +
-// Add initial first mouse pos setup for tale
+// Add initial first mouse pos setup for tale +
 // Add limit distance to tale
 
-// wait in requestAnimFrame for mousepos is got
-// and then start requestAnimFrame with mousetalefunc
-// Calc hipotenuse in separate method
+// wait in requestAnimFrame for mousepos is got +
+// and then start requestAnimFrame with mousetalefunc +
+// Calc hipotenuse in separate method +
 
-  moveTale() {
-    this.talex = this.talex || this.x;
-    this.taley = this.taley || this.y;
+  animate() {
+    this.moveTale(this.tale, this.coords);
+    this.moveTale(this.tale2, this.coords);
+    this.moveTale(this.tale3, this.coords);
 
-
-    if (!window.ctrlPressed) {
-      this.requestId = requestAnimationFrame(this.moveTale.bind(this));
-      return;
-
-    }
-    var taleNewPos = this.calcDirectRoute({
-      x : this.talex,
-      y : this.taley
-    }, {
-      x : this.x,
-      y : this.y
-    }, 3);
-    // console.log(taleNewPos);
-
-    var xd = this.x - this.talex;
-    var directionx = xd > 0 ? 1 : -1;
-    if (taleNewPos.x) xd = taleNewPos.x;
-    this.talex += Math.min(this.speedx, Math.abs(xd)) * directionx;
-
-    var yd = this.y - this.taley;
-    var directiony = yd > 0 ? 1 : -1;
-    if (taleNewPos.y) yd = taleNewPos.y;
-    this.taley += Math.min(this.speedy, Math.abs(yd)) * directiony;
-
-    var tale = this.mouseTale;
-    tale.setAttribute("cx", this.talex);
-    tale.setAttribute("cy", this.taley);
-
-    this.requestId = requestAnimationFrame(this.moveTale.bind(this));
+    this.requestId = requestAnimationFrame(this.animate.bind(this));
   }
 
-  calcDirectRoute(posFrom, posTo, length) {
-    var p1 = posFrom;
-    var p2 = posTo;
+  setTalePos(tale, pos) {
+    tale.x = pos.x;
+    tale.y = pos.y;
 
-    // if x eqals then return only y
-    // if y equals then return only x
-    if (p1.x == p2.x && p1.y == p2.y) {
-      return {
-        x : 0,
-        y : 0
-      };
-    } else if (p1.x == p2.x) {
-      return {
-        x : p1.x,
-        y : 0
-      };
-    } else if (p1.y == p2.y) {
-      return {
-        x : 0,
-        y : p1.y
-      };
+    tale.el.setAttribute("cx", tale.x);
+    tale.el.setAttribute("cy", tale.y);
+  }
+
+  moveTale(tale, destCoords) {
+    tale.x = tale.x || destCoords.x;
+    tale.y = tale.y || destCoords.y;
+
+    // if (!window.ctrlPressed) {
+    //   this.requestId = requestAnimationFrame(
+    //     this.moveTale.bind(this)
+    //   );
+    //   return;
+    // }
+
+    let taleDelta = this.taleDelta(
+      tale,
+      destCoords,
+      tale.speed
+    );
+
+    tale.x += taleDelta.dx;
+    tale.y += taleDelta.dy;
+
+    tale.el.setAttribute("cx", tale.x);
+    tale.el.setAttribute("cy", tale.y);
+  }
+
+  taleDelta(elFrom, elTo, step) {
+    let p1 = elFrom;
+    let p2 = elTo;
+    let dx, dy;
+
+    if (p1.x == p2.x || p1.y == p2.y) {
+      dx = p1.x == p2.x ? 0 : p2.x - p1.x;
+      dy = p1.y == p2.y ? 0 : p2.y - p1.y;
+    } else {
+      let directionx = p2.x > p1.x ? 1 : -1;
+      let directiony = p2.y > p1.y ? 1 : -1;
+
+      let dxOrigin = p2.x - p1.x;
+      let dyOrigin = p2.y - p1.y;
+      let tg = dyOrigin / dxOrigin;
+      let tgScr = tg * tg;
+
+      let sinsq = tgScr / (1 + tgScr);
+      let cossq = 1 - sinsq;
+      let sin = Math.sqrt(sinsq);
+      let cos = Math.sqrt(cossq);
+
+      dx = step * cos * directionx;
+      dy = step * sin * directiony;
     }
 
-    var dxOrigin = p2.x - p1.x; // Math.abs()
-    var dyOrigin = p2.y - p1.y; // Math.abs()
-    var tg = dyOrigin / dxOrigin;
-
-    var sinsq = 1 / (1 + 1/tg * tg);
-    var cossq = 1 - sinsq;
-    var sin = Math.sqrt(sinsq);
-    var cos = Math.sqrt(cossq);
-
-    var dx = length * cos;
-    var dy = length * sin;
-
-    // console.log({p1: p1, p2: p2});
-    // console.log("tg: " + tg);
-    // console.log("sinsq:" + sinsq);
-    // console.log("cossq:" + cossq);
-    // console.log("dx: " + dx);
-    // console.log("dy: " + dy);
-
     return {
-      x: dx,
-      y: dy
+      dx,
+      dy
     };
   }
 
   setMouseEvents() {
-    window.onkeydown = function(e) {
+    window.onkeydown = e => {
       this.ctrlPressed = true;
     };
-    window.onkeyup = function(e) {
+    window.onkeyup = e => {
       this.ctrlPressed = false;
     };
     this.el.addEventListener('mousemove', e => {
@@ -127,27 +123,20 @@ class Tale {
       var circle = this.mouseCircle;
       circle.setAttribute("cx", mousepos.x);
       circle.setAttribute("cy", mousepos.y);
-      // this.moveTaleTo(mousepos);
-      this.x = mousepos.x;
-      this.y = mousepos.y;
-      // console.log(mousepos);
-      // console.log(this.talex);
+      this.coords.x = mousepos.x;
+      this.coords.y = mousepos.y;
     });
 
     this.el.addEventListener('mouseleave', e => {
-      console.log('leave :');
-      console.log(e);
+      cancelAnimationFrame(this.requestId);
     });
 
     this.el.addEventListener('mouseenter', e => {
-      console.log('=> enter :');
-      console.log(e);
+      this.coords = getMousePos();
+      this.requestId = requestAnimationFrame(
+        this.animate.bind(this)
+      );
     });
-  }
-
-  onMousemove() {
-    var mousepos = getMousePos();
-    this.setTransform(card, mousepos, this.moveOpt.card);
   }
 }
 
@@ -163,7 +152,7 @@ function getMousePos(e) {
     posx = e.clientX + docScrolls.left;
     posy = e.clientY + docScrolls.top;
   }
-  return { x : posx, y : posy };
+  return { x: posx, y: posy };
 }
 
 function getDocScrolls() {
@@ -175,7 +164,3 @@ function getDocScrolls() {
 
 var el = document.querySelector('#main-svg');
 var tilt = new Tale({el: el});
-
-// document.addEventListener('mousemove', function() {
-//   tilt.onMousemove();
-// });

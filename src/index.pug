@@ -10,9 +10,9 @@ body
     defs
       filter#filter
         fegaussianblur(in='SourceGraphic', stddeviation='10', result='blur')
-        fecolormatrix(in='blur', mode='matrix', values='1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 17 -7', result='filter')
+        fecolormatrix(in='blur', mode='matrix', values='1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7', result='filter')
         //- fecomposite(in='SourceGraphic', in2='filter', operator='atop')
-        feBlend(in='SourceGraphic' in2='filter')
+        //- feBlend(in='SourceGraphic' in2='filter', operator='atop')
         //- // border-area
         //- feflood(flood-color='black', result='outside-color')
         //- femorphology(in='SourceAlpha', operator='dilate', radius='1')
@@ -30,5 +30,7 @@ body
   svg(id="main-svg")
     circle(id="mouse-circle", r="30", fill="gray")
     circle(id="mouse-tale", r="20", fill="gray")
+    circle(id="mouse-tale2", r="20", fill="gray")
+    circle(id="mouse-tale3", r="20", fill="gray")
   script(src='jquery/jquery-3.1.1.min.js')
   script(src='scripts.js')
