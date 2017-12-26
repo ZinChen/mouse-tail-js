@@ -1,33 +1,44 @@
 class Tale {
   constructor(options) {
     this.el = options.el;
-    this.tale = {
-      el: this.el.querySelector('#mouse-tale'),
-      x: 0,
-      y: 0,
-      speed: 3,
-      maxDistance: 30
-    };
-    this.tale2 = {
-      el: this.el.querySelector('#mouse-tale2'),
-      x: 0,
-      y: 0,
-      speed: 4,
-      maxDistance: 30
-    };
-    this.tale3 = {
-      el: this.el.querySelector('#mouse-tale3'),
-      x: 0,
-      y: 0,
-      speed: 5,
-      maxDistance: 30
-    };
-    this.coords = {
+    this.circle = {
+      el: this.el.querySelector('#mouse-circle'),
       x: 0,
       y: 0
     };
-    this.mouseCircle = this.el.querySelector('#mouse-circle');
+    this.tales = [
+      {
+        el: this.el.querySelector('#mouse-tale'),
+        x: 0,
+        y: 0,
+        speed: 3,
+        maxDistance: 30
+      }, {
+        el: this.el.querySelector('#mouse-tale2'),
+        x: 0,
+        y: 0,
+        speed: 4,
+        maxDistance: 30
+      }, {
+        el: this.el.querySelector('#mouse-tale3'),
+        x: 0,
+        y: 0,
+        speed: 5,
+        maxDistance: 30
+      }
+    ];
     this.setMouseEvents();
+    this.initializeCircles({
+      x: this.el.clientWidth / 2,
+      y: this.el.clientHeight / 2
+    });
+  }
+
+  initializeCircles(pos = null) {
+    this.setCirclePos(this.circle, pos);
+    this.tales.forEach((tale) => {
+      this.setCirclePos(tale, this.circle);
+    });
   }
 
 // TODO:
@@ -40,19 +51,22 @@ class Tale {
 // Calc hipotenuse in separate method +
 
   animate() {
-    this.moveTale(this.tale, this.coords);
-    this.moveTale(this.tale2, this.coords);
-    this.moveTale(this.tale3, this.coords);
+    this.tales.forEach((tale) => {
+      this.moveTale(tale, this.circle);
+    });
 
     this.requestId = requestAnimationFrame(this.animate.bind(this));
   }
 
-  setTalePos(tale, pos) {
-    tale.x = pos.x;
-    tale.y = pos.y;
+  setCirclePos(circle, pos = null) {
+    if (pos) {
+      circle.x = pos.x;
+      circle.y = pos.y;
+    }
 
-    tale.el.setAttribute("cx", tale.x);
-    tale.el.setAttribute("cy", tale.y);
+
+    circle.el.setAttribute("cx", circle.x);
+    circle.el.setAttribute("cy", circle.y);
   }
 
   moveTale(tale, destCoords) {
@@ -83,20 +97,19 @@ class Tale {
     let p1 = elFrom;
     let p2 = elTo;
     let dx, dy;
+    let directionx = p2.x > p1.x ? 1 : -1;
+    let directiony = p2.y > p1.y ? 1 : -1;
 
     if (p1.x == p2.x || p1.y == p2.y) {
-      dx = p1.x == p2.x ? 0 : p2.x - p1.x;
-      dy = p1.y == p2.y ? 0 : p2.y - p1.y;
+      dx = p1.x == p2.x ? 0 : step * directionx;
+      dy = p1.y == p2.y ? 0 : step * directiony;
     } else {
-      let directionx = p2.x > p1.x ? 1 : -1;
-      let directiony = p2.y > p1.y ? 1 : -1;
-
       let dxOrigin = p2.x - p1.x;
       let dyOrigin = p2.y - p1.y;
       let tg = dyOrigin / dxOrigin;
-      let tgScr = tg * tg;
+      let tgsq = tg * tg;
 
-      let sinsq = tgScr / (1 + tgScr);
+      let sinsq = tgsq / (1 + tgsq);
       let cossq = 1 - sinsq;
       let sin = Math.sqrt(sinsq);
       let cos = Math.sqrt(cossq);
@@ -120,19 +133,20 @@ class Tale {
     };
     this.el.addEventListener('mousemove', e => {
       var mousepos = getMousePos();
-      var circle = this.mouseCircle;
+      var circle = this.circle.el;
       circle.setAttribute("cx", mousepos.x);
       circle.setAttribute("cy", mousepos.y);
-      this.coords.x = mousepos.x;
-      this.coords.y = mousepos.y;
+      this.circle.x = mousepos.x;
+      this.circle.y = mousepos.y;
     });
 
     this.el.addEventListener('mouseleave', e => {
+      // this.initializeCircles(getMousePos());
       cancelAnimationFrame(this.requestId);
     });
 
     this.el.addEventListener('mouseenter', e => {
-      this.coords = getMousePos();
+      // this.initializeCircles(getMousePos());
       this.requestId = requestAnimationFrame(
         this.animate.bind(this)
       );
