@@ -4,25 +4,29 @@ class Tale {
     this.circle = {
       el: this.el.querySelector('#mouse-circle'),
       x: 0,
-      y: 0
+      y: 0,
+      r: 50
     };
     this.tales = [
       {
         el: this.el.querySelector('#mouse-tale'),
         x: 0,
         y: 0,
+        r: 30,
         speed: 3,
         maxDistance: 30
       }, {
         el: this.el.querySelector('#mouse-tale2'),
         x: 0,
         y: 0,
+        r: 30,
         speed: 4,
         maxDistance: 30
       }, {
         el: this.el.querySelector('#mouse-tale3'),
         x: 0,
         y: 0,
+        r: 30,
         speed: 5,
         maxDistance: 30
       }
@@ -36,8 +40,10 @@ class Tale {
 
   initializeCircles(pos = null) {
     this.setCirclePos(this.circle, pos);
+    this.setCircleRadius(this.circle);
     this.tales.forEach((tale) => {
       this.setCirclePos(tale, this.circle);
+      this.setCircleRadius(tale);
     });
   }
 
@@ -64,9 +70,17 @@ class Tale {
       circle.y = pos.y;
     }
 
+    circle.el.style.top = Math.round(circle.y) + "px";
+    circle.el.style.left = Math.round(circle.x) + "px";
+  }
 
-    circle.el.setAttribute("cx", circle.x);
-    circle.el.setAttribute("cy", circle.y);
+  setCircleRadius(circle, r) {
+    if (r) {
+      circle.r = r;
+    }
+
+    circle.el.style.width = circle.r + "px";
+    circle.el.style.height = circle.r + "px";
   }
 
   moveTale(tale, destCoords) {
@@ -89,8 +103,7 @@ class Tale {
     tale.x += taleDelta.dx;
     tale.y += taleDelta.dy;
 
-    tale.el.setAttribute("cx", tale.x);
-    tale.el.setAttribute("cy", tale.y);
+    this.setCirclePos(tale);
   }
 
   taleDelta(elFrom, elTo, step) {
@@ -133,11 +146,7 @@ class Tale {
     };
     this.el.addEventListener('mousemove', e => {
       var mousepos = getMousePos();
-      var circle = this.circle.el;
-      circle.setAttribute("cx", mousepos.x);
-      circle.setAttribute("cy", mousepos.y);
-      this.circle.x = mousepos.x;
-      this.circle.y = mousepos.y;
+      this.setCirclePos(this.circle, mousepos);
     });
 
     this.el.addEventListener('mouseleave', e => {
@@ -176,5 +185,5 @@ function getDocScrolls() {
   };
 }
 
-var el = document.querySelector('#main-svg');
+var el = document.querySelector('.wrapper');
 var tilt = new Tale({el: el});
