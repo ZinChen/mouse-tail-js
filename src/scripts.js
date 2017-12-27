@@ -5,30 +5,30 @@ class Tale {
       el: this.el.querySelector('#mouse-circle'),
       x: 0,
       y: 0,
-      r: 50
+      r: 60
     };
     this.tales = [
       {
         el: this.el.querySelector('#mouse-tale'),
         x: 0,
         y: 0,
-        r: 30,
+        r: 40,
         speed: 3,
-        maxDistance: 30
+        maxDistance: 300
       }, {
         el: this.el.querySelector('#mouse-tale2'),
         x: 0,
         y: 0,
-        r: 30,
+        r: 40,
         speed: 4,
-        maxDistance: 30
+        maxDistance: 300
       }, {
         el: this.el.querySelector('#mouse-tale3'),
         x: 0,
         y: 0,
-        r: 30,
+        r: 40,
         speed: 5,
-        maxDistance: 30
+        maxDistance: 300
       }
     ];
     this.setMouseEvents();
@@ -50,7 +50,7 @@ class Tale {
 // TODO:
 // Add request animation frame +
 // Add initial first mouse pos setup for tale +
-// Add limit distance to tale
+// Add limit distance to tale +
 
 // wait in requestAnimFrame for mousepos is got +
 // and then start requestAnimFrame with mousetalefunc +
@@ -61,7 +61,15 @@ class Tale {
       this.moveTale(tale, this.circle);
     });
 
+    this.calculateCollisions();
+
     this.requestId = requestAnimationFrame(this.animate.bind(this));
+  }
+
+  calculateCollisions() {
+    // mouse + tale: is crossed
+    //   in and out events
+    // tale x tale: cross events
   }
 
   setCirclePos(circle, pos = null) {
@@ -112,13 +120,23 @@ class Tale {
     let dx, dy;
     let directionx = p2.x > p1.x ? 1 : -1;
     let directiony = p2.y > p1.y ? 1 : -1;
+    let dxOrigin = p2.x - p1.x;
+    let dyOrigin = p2.y - p1.y;
+    let maxDi = elFrom.maxDistance;
 
-    if (p1.x == p2.x || p1.y == p2.y) {
+    if (maxDi) {
+      let distance = Math.sqrt(
+        Math.pow(dxOrigin, 2) + Math.pow(dyOrigin, 2)
+      );
+      if (distance > maxDi) {
+        step *= distance / maxDi;
+      }
+    }
+
+    if ( dxOrigin == 0 || dyOrigin == 0 ) {
       dx = p1.x == p2.x ? 0 : step * directionx;
       dy = p1.y == p2.y ? 0 : step * directiony;
     } else {
-      let dxOrigin = p2.x - p1.x;
-      let dyOrigin = p2.y - p1.y;
       let tg = dyOrigin / dxOrigin;
       let tgsq = tg * tg;
 
