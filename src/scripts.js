@@ -29,6 +29,13 @@ class Tale {
         r: 40,
         speed: 5,
         maxDistance: 300
+      }, {
+        el: this.el.querySelector('#mouse-tale4'),
+        x: 0,
+        y: 0,
+        r: 40,
+        speed: 6,
+        maxDistance: 300
       }
     ];
     this.setMouseEvents();
@@ -36,6 +43,7 @@ class Tale {
       x: this.el.clientWidth / 2,
       y: this.el.clientHeight / 2
     });
+    this.collisions = [];
   }
 
   initializeCircles(pos = null) {
@@ -47,26 +55,53 @@ class Tale {
     });
   }
 
-// TODO:
-// Add request animation frame +
-// Add initial first mouse pos setup for tale +
-// Add limit distance to tale +
-
-// wait in requestAnimFrame for mousepos is got +
-// and then start requestAnimFrame with mousetalefunc +
-// Calc hipotenuse in separate method +
-
   animate() {
-    this.tales.forEach((tale) => {
-      this.moveTale(tale, this.circle);
-    });
+    // if (this.ctrlPressed) {
+      this.tales.forEach((tale) => {
+        this.moveTale(tale, this.circle);
+      });
+    // }
 
     this.calculateCollisions();
 
     this.requestId = requestAnimationFrame(this.animate.bind(this));
   }
 
+  // TODO:
+  // - Create class for Tale
+  // - Create class for collision
+  // - Add animation library
+  // - Change Mouse circle radius on collision
+  // - Jelly animation on collision
+
+
   calculateCollisions() {
+    this.tales.forEach(function(tale) {
+      // calculate collisions with Mouse circle
+    });
+
+    // calculate collisions between tales
+    for (let i = 0; i < this.tales.length - 2; i++) {
+      let tale = this.tales[i];
+      for (let j = i + 1; j < this.tales.length - 1; j++) {
+        let otherTale =  this.tales[j];
+        let talesDistance = Math.sqrt(
+            Math.pow(otherTale.x - tale.x, 2) +
+            Math.pow(otherTale.y - tale.y, 2)
+            );
+        if ( talesDistance <= tale.r + otherTale.r &&
+            !this.collisions[i*100 + j]
+          ) {
+            this.collisions[i*100 + j] = true;
+            console.log(`Collision of ${i} and ${j}`);
+        } else if (talesDistance > tale.r + otherTale.r &&
+            this.collisions[i*100 + j]
+          ) {
+            this.collisions[i*100 + j] = false;
+            console.log(`Collision of ${i} and ${j} stopped!`);
+        }
+      }
+    }
     // mouse + tale: is crossed
     //   in and out events
     // tale x tale: cross events
@@ -95,13 +130,6 @@ class Tale {
     tale.x = tale.x || destCoords.x;
     tale.y = tale.y || destCoords.y;
 
-    // if (!window.ctrlPressed) {
-    //   this.requestId = requestAnimationFrame(
-    //     this.moveTale.bind(this)
-    //   );
-    //   return;
-    // }
-
     let taleDelta = this.taleDelta(
       tale,
       destCoords,
@@ -123,27 +151,20 @@ class Tale {
     let dxOrigin = p2.x - p1.x;
     let dyOrigin = p2.y - p1.y;
     let maxDi = elFrom.maxDistance;
+    let distance = Math.sqrt(
+      Math.pow(dxOrigin, 2) + Math.pow(dyOrigin, 2)
+    );
 
-    if (maxDi) {
-      let distance = Math.sqrt(
-        Math.pow(dxOrigin, 2) + Math.pow(dyOrigin, 2)
-      );
-      if (distance > maxDi) {
-        step *= distance / maxDi;
-      }
+    if (maxDi && distance > maxDi) {
+      step *= distance / maxDi;
     }
 
     if ( dxOrigin == 0 || dyOrigin == 0 ) {
       dx = p1.x == p2.x ? 0 : step * directionx;
       dy = p1.y == p2.y ? 0 : step * directiony;
     } else {
-      let tg = dyOrigin / dxOrigin;
-      let tgsq = tg * tg;
-
-      let sinsq = tgsq / (1 + tgsq);
-      let cossq = 1 - sinsq;
-      let sin = Math.sqrt(sinsq);
-      let cos = Math.sqrt(cossq);
+      let sin = Math.abs(dyOrigin / distance);
+      let cos = Math.abs(dxOrigin / distance);
 
       dx = step * cos * directionx;
       dy = step * sin * directiony;
