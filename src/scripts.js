@@ -28,7 +28,8 @@ class Tale {
       el: this.el.querySelector('#mouse-circle'),
       x: 0,
       y: 0,
-      r: 60
+      r: 60,
+      scale: 1
     };
     this.tales = [
       new TaleCircle({
@@ -54,6 +55,9 @@ class Tale {
       y: this.el.clientHeight / 2
     });
     this.collisions = [];
+    this.collision = {
+      step: 0.5 / this.tales.length
+    };
   }
 
   initializeCircles(pos = null) {
@@ -70,9 +74,10 @@ class Tale {
       this.tales.forEach((tale) => {
         this.moveTale(tale, this.mouse);
       });
+
+      this.calculateCollisions();
     // }
 
-    this.calculateCollisions();
 
     this.requestId = requestAnimationFrame(this.animate.bind(this));
   }
@@ -80,20 +85,29 @@ class Tale {
   // TODO:
   // - Create class for Tale +
   // - Create class for collision +
-  // - Add animation library
-  // - Change Mouse circle radius on collision
+  // - Add animation library +
+  // - Change Mouse circle radius on collision +
   // - Jelly animation on collision
 
+
+  animScale(el) {
+    TweenMax.to(el.el, 0.7, {
+      css: { scale: el.scale },
+      ease: Elastic.easeOut.config(2, 0.3)
+    });
+  }
 
   calculateCollisions() {
     let taleClass = this;
     this.tales.forEach(function(tale, i) {
-      let collisionState = taleClass.getCollissionState(taleClass.mouse, tale, i * -1);
+      let collisionState = taleClass.getCollissionState(taleClass.mouse, tale, i * -10);
       // calculate grow step mouse.r / this.talse.length / 2
       if (collisionState == CollisionState.IN) {
-        // this.mouse bigger
-      } else {
-        // this.mouse lesser
+        taleClass.mouse.scale += taleClass.collision.step;
+        taleClass.animScale(taleClass.mouse);
+      } else if (collisionState == CollisionState.OUT) {
+        taleClass.mouse.scale -= taleClass.collision.step;
+        taleClass.animScale(taleClass.mouse);
       }
     });
 
@@ -115,10 +129,7 @@ class Tale {
 
   getCollissionState(el1, el2, index) {
     let state = CollisionState.NOT_CHANGED;
-    let talesDistance = Math.sqrt(
-        Math.pow(el2.x - el2.x, 2) +
-        Math.pow(el2.y - el2.y, 2)
-        );
+    let talesDistance = Math.hypot( el2.x - el1.x , el2.y - el1.y );
     let collisionDistance = el2.r + el2.r;
     if ( talesDistance <= collisionDistance && !this.collisions[index] ) {
         this.collisions[index] = true;
@@ -175,9 +186,7 @@ class Tale {
     let dxOrigin = p2.x - p1.x;
     let dyOrigin = p2.y - p1.y;
     let maxDi = elFrom.maxDistance;
-    let distance = Math.sqrt(
-      Math.pow(dxOrigin, 2) + Math.pow(dyOrigin, 2)
-    );
+    let distance = Math.hypot(dxOrigin, dyOrigin);
 
     if (maxDi && distance > maxDi) {
       step *= distance / maxDi;
