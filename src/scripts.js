@@ -1,42 +1,52 @@
+class TaleCircle {
+  constructor(options) {
+    this.el = options.el;
+    this.x = options.x || 0;
+    this.y = options.y || 0;
+    this.r = options.r ||40;
+    this.speed = options.speed || 3;
+    this.maxDistance = options.maxDistance || 300;
+  }
+}
+
+class CollisionState {
+  constructor(name) {
+    this.name = name;
+  }
+  toString() {
+    return `${this.name}`;
+  }
+}
+CollisionState.NOT_CHANGED = new CollisionState('NOT_CHANGED');
+CollisionState.IN = new CollisionState('IN');
+CollisionState.OUT = new CollisionState('OUT');
+
 class Tale {
   constructor(options) {
     this.el = options.el;
-    this.circle = {
+    this.mouse = {
       el: this.el.querySelector('#mouse-circle'),
       x: 0,
       y: 0,
       r: 60
     };
     this.tales = [
-      {
-        el: this.el.querySelector('#mouse-tale'),
-        x: 0,
-        y: 0,
-        r: 40,
-        speed: 3,
-        maxDistance: 300
-      }, {
-        el: this.el.querySelector('#mouse-tale2'),
-        x: 0,
-        y: 0,
-        r: 40,
-        speed: 4,
-        maxDistance: 300
-      }, {
-        el: this.el.querySelector('#mouse-tale3'),
-        x: 0,
-        y: 0,
-        r: 40,
-        speed: 5,
-        maxDistance: 300
-      }, {
-        el: this.el.querySelector('#mouse-tale4'),
-        x: 0,
-        y: 0,
-        r: 40,
-        speed: 6,
-        maxDistance: 300
-      }
+      new TaleCircle({
+        el: this.el.querySelector('#mouse-tale-1'),
+        speed: 3
+      }),
+      new TaleCircle({
+        el: this.el.querySelector('#mouse-tale-2'),
+        speed: 4
+      }),
+      new TaleCircle({
+        el: this.el.querySelector('#mouse-tale-3'),
+        speed: 5
+      }),
+      new TaleCircle({
+        el: this.el.querySelector('#mouse-tale-4'),
+        speed: 6
+      })
     ];
     this.setMouseEvents();
     this.initializeCircles({
@@ -47,10 +57,10 @@ class Tale {
   }
 
   initializeCircles(pos = null) {
-    this.setCirclePos(this.circle, pos);
-    this.setCircleRadius(this.circle);
+    this.setCirclePos(this.mouse, pos);
+    this.setCircleRadius(this.mouse);
     this.tales.forEach((tale) => {
-      this.setCirclePos(tale, this.circle);
+      this.setCirclePos(tale, this.mouse);
       this.setCircleRadius(tale);
     });
   }
@@ -58,7 +68,7 @@ class Tale {
   animate() {
     // if (this.ctrlPressed) {
       this.tales.forEach((tale) => {
-        this.moveTale(tale, this.circle);
+        this.moveTale(tale, this.mouse);
       });
     // }
 
@@ -68,43 +78,57 @@ class Tale {
   }
 
   // TODO:
-  // - Create class for Tale
-  // - Create class for collision
+  // - Create class for Tale +
+  // - Create class for collision +
   // - Add animation library
   // - Change Mouse circle radius on collision
   // - Jelly animation on collision
 
 
   calculateCollisions() {
-    this.tales.forEach(function(tale) {
-      // calculate collisions with Mouse circle
+    let taleClass = this;
+    this.tales.forEach(function(tale, i) {
+      let collisionState = taleClass.getCollissionState(taleClass.mouse, tale, i * -1);
+      // calculate grow step mouse.r / this.talse.length / 2
+      if (collisionState == CollisionState.IN) {
+        // this.mouse bigger
+      } else {
+        // this.mouse lesser
+      }
     });
 
-    // calculate collisions between tales
     for (let i = 0; i < this.tales.length - 2; i++) {
-      let tale = this.tales[i];
       for (let j = i + 1; j < this.tales.length - 1; j++) {
-        let otherTale =  this.tales[j];
-        let talesDistance = Math.sqrt(
-            Math.pow(otherTale.x - tale.x, 2) +
-            Math.pow(otherTale.y - tale.y, 2)
-            );
-        if ( talesDistance <= tale.r + otherTale.r &&
-            !this.collisions[i*100 + j]
-          ) {
-            this.collisions[i*100 + j] = true;
-            console.log(`Collision of ${i} and ${j}`);
-        } else if (talesDistance > tale.r + otherTale.r &&
-            this.collisions[i*100 + j]
-          ) {
-            this.collisions[i*100 + j] = false;
-            console.log(`Collision of ${i} and ${j} stopped!`);
+        let tale1 = this.tales[i];
+        let tale2 = this.tales[j];
+        let collisionState = this.getCollissionState(tale1, tale2, i*100 + j);
+        if (collisionState == CollisionState.IN) {
+
+        } else if (collisionState == CollisionState.OUT) {
+
+        } else {
+
         }
       }
     }
-    // mouse + tale: is crossed
-    //   in and out events
-    // tale x tale: cross events
+  }
+
+  getCollissionState(el1, el2, index) {
+    let state = CollisionState.NOT_CHANGED;
+    let talesDistance = Math.sqrt(
+        Math.pow(el2.x - el2.x, 2) +
+        Math.pow(el2.y - el2.y, 2)
+        );
+    let collisionDistance = el2.r + el2.r;
+    if ( talesDistance <= collisionDistance && !this.collisions[index] ) {
+        this.collisions[index] = true;
+        state = CollisionState.IN;
+        // console.log(`Collision of ${i} and ${j}`);
+    } else if (talesDistance > el2.r + el2.r && this.collisions[index] ) {
+        this.collisions[index] = false;
+        state = CollisionState.OUT;
+    }
+    return state;
   }
 
   setCirclePos(circle, pos = null) {
@@ -185,7 +209,7 @@ class Tale {
     };
     this.el.addEventListener('mousemove', e => {
       var mousepos = getMousePos();
-      this.setCirclePos(this.circle, mousepos);
+      this.setCirclePos(this.mouse, mousepos);
     });
 
     this.el.addEventListener('mouseleave', e => {
