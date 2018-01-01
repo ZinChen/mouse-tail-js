@@ -34,19 +34,19 @@ class Tale {
     this.tales = [
       new TaleCircle({
         el: this.el.querySelector('#mouse-tale-1'),
-        speed: 3
+        speed: 2
       }),
       new TaleCircle({
         el: this.el.querySelector('#mouse-tale-2'),
-        speed: 4
+        speed: 3
       }),
       new TaleCircle({
         el: this.el.querySelector('#mouse-tale-3'),
-        speed: 5
+        speed: 4
       }),
       new TaleCircle({
         el: this.el.querySelector('#mouse-tale-4'),
-        speed: 6
+        speed: 5
       })
     ];
     this.setMouseEvents();
@@ -97,29 +97,55 @@ class Tale {
     });
   }
 
+  animShake(item) {
+    let circles = item.el.querySelectorAll('.inner-circle');
+    circles.forEach((circle, i) => {
+      let delay = i * 0.08;
+      TweenMax.to(circle, 0.15, {
+        delay: delay,
+        scaleY: 1.15,
+        force3D: true,
+        ease: Quad.easeInOut,
+        onComplete: () => {
+          TweenMax.to(circle, 2.5, {
+            scaleY: 1,
+            force3D: true,
+            ease: Elastic.easeOut,
+            easeParams: [1.2, 0.12]
+          });
+        }
+      });
+    });
+  }
+
   calculateCollisions() {
-    let taleClass = this;
-    this.tales.forEach(function(tale, i) {
-      let collisionState = taleClass.getCollissionState(taleClass.mouse, tale, i * -10);
+    let t = this;
+    this.tales.forEach((tale, i) => {
+      let state = t.getCollissionState(t.mouse, tale, i * -10);
       // calculate grow step mouse.r / this.talse.length / 2
-      if (collisionState == CollisionState.IN) {
-        taleClass.mouse.scale += taleClass.collision.step;
-        taleClass.animScale(taleClass.mouse);
-      } else if (collisionState == CollisionState.OUT) {
-        taleClass.mouse.scale -= taleClass.collision.step;
-        taleClass.animScale(taleClass.mouse);
+      if (state == CollisionState.IN) {
+        t.mouse.scale += t.collision.step;
+        t.animScale(t.mouse);
+        t.animShake(t.mouse);
+      } else if (state == CollisionState.OUT) {
+        t.mouse.scale -= t.collision.step;
+        t.animScale(t.mouse);
+        t.animShake(t.mouse);
+        t.animShake(tale);
       }
     });
 
-    for (let i = 0; i < this.tales.length - 2; i++) {
-      for (let j = i + 1; j < this.tales.length - 1; j++) {
+    for (let i = 0; i < this.tales.length - 1; i++) {
+      for (let j = i + 1; j < this.tales.length; j++) {
         let tale1 = this.tales[i];
         let tale2 = this.tales[j];
-        let collisionState = this.getCollissionState(tale1, tale2, i*100 + j);
-        if (collisionState == CollisionState.IN) {
-
-        } else if (collisionState == CollisionState.OUT) {
-
+        let state = this.getCollissionState(tale1, tale2, i*100 + j);
+        if (state == CollisionState.IN) {
+          // this.animShake(tale1);
+          // this.animShake(tale2);
+        } else if (state == CollisionState.OUT) {
+          // this.animShake(tale1);
+          // this.animShake(tale2);
         } else {
 
         }
@@ -216,6 +242,11 @@ class Tale {
     window.onkeyup = e => {
       this.ctrlPressed = false;
     };
+
+    this.mouse.el.addEventListener("click",  e => {
+      this.animShake(this.mouse);
+    });
+
     this.el.addEventListener('mousemove', e => {
       var mousepos = getMousePos();
       this.setCirclePos(this.mouse, mousepos);
