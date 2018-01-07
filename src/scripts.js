@@ -3,7 +3,7 @@ class TaleCircle {
     this.el = options.el;
     this.x = options.x || 0;
     this.y = options.y || 0;
-    this.r = options.r ||40;
+    this.r = options.r || 40;
     this.speed = options.speed || 3;
     this.maxDistance = options.maxDistance || 300;
   }
@@ -24,6 +24,8 @@ CollisionState.OUT = new CollisionState('OUT');
 class Tale {
   constructor(options) {
     this.el = options.el;
+    this.el.cx = this.el.clientWidth / 2;
+    this.el.cy = this.el.clientHeight / 2;
     this.mouse = {
       el: this.el.querySelector('#mouse-circle'),
       x: 0,
@@ -51,16 +53,31 @@ class Tale {
     ];
     this.setMouseEvents();
     this.initializeCircles({
-      x: this.el.clientWidth / 2,
-      y: this.el.clientHeight / 2
+      x: this.el.cx,
+      y: this.el.cy
     });
     this.collisions = [];
     this.collision = {
       step: 0.5 / this.tales.length
     };
+    this.requestId = null;
     this.iddle = false;
-    this.iddleFramesMax = 30;
+    this.iddleFramesMax = 100;
     this.iddleFrames = 0;
+    this.demoOptions = {
+      r: Math.min(this.el.cx, this.el.cy) / 2,
+      step: 0.053,
+      angle: 0,
+      cx: this.el.clientWidth / 2,
+      cy: this.el.clientHeight / 2
+    };
+
+    // Initialiaze demo spin
+    this.iddle = true;
+    this.iddleFrames = this.iddleFramesMax++;
+    this.requestId = requestAnimationFrame(
+      this.animate.bind(this)
+    );
   }
 
   initializeCircles(pos = null) {
@@ -78,9 +95,11 @@ class Tale {
     }
 
     if (this.iddleFrames > this.iddleFramesMax) {
-      cancelAnimationFrame(this.requestId);
-      this.requestId = null;
-      return;
+      this.demo();
+      this.setCirclePos(this.mouse);
+      // cancelAnimationFrame(this.requestId);
+      // this.requestId = null;
+      // return;
     }
 
     // if (this.ctrlPressed) {
@@ -91,8 +110,19 @@ class Tale {
       this.calculateCollisions();
     // }
 
-
     this.requestId = requestAnimationFrame(this.animate.bind(this));
+  }
+
+  demo() {
+    let opts = this.demoOptions;
+    let minStep = 0.004;
+    let velocity = Math.pow(Math.cos(opts.angle), 2);
+    opts.angle += opts.step * velocity + minStep;
+    if (opts.angle >= 2 * Math.PI) {
+      opts.angle = 0;
+    }
+    this.mouse.x = opts.cx + opts.r * Math.cos(opts.angle);
+    this.mouse.y = opts.cy + opts.r * Math.sin(opts.angle);
   }
 
   // TODO:
@@ -100,7 +130,7 @@ class Tale {
   // - Create class for collision +
   // - Add animation library +
   // - Change Mouse circle radius on collision +
-  // - Jelly animation on collision
+  // - Jelly animation on collision +
 
 
   animScale(el) {
@@ -264,9 +294,12 @@ class Tale {
       var mousepos = getMousePos();
       this.setCirclePos(this.mouse, mousepos);
 
-      if (this.requestId === null) {
+      if (this.iddleFrames >= this.iddleFramesMax) {
         this.iddleFrames = 0;
         this.iddle = false;
+      }
+
+      if (this.requestId === null) {
         this.requestId = requestAnimationFrame(
           this.animate.bind(this)
         );
@@ -281,11 +314,17 @@ class Tale {
 
     this.el.addEventListener('mouseenter', e => {
       // this.initializeCircles(getMousePos());
-      this.iddle = false;
-      this.iddleFrames = 0;
-      this.requestId = requestAnimationFrame(
-        this.animate.bind(this)
-      );
+
+      if (this.iddleFrames >= this.iddleFramesMax) {
+        this.iddleFrames = 0;
+        this.iddle = false;
+      }
+
+      if (this.requestId === null) {
+        this.requestId = requestAnimationFrame(
+          this.animate.bind(this)
+        );
+      }
     });
   }
 }
