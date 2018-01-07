@@ -97,18 +97,13 @@ class Tale {
     if (this.iddleFrames > this.iddleFramesMax) {
       this.demo();
       this.setCirclePos(this.mouse);
-      // cancelAnimationFrame(this.requestId);
-      // this.requestId = null;
-      // return;
     }
 
-    // if (this.ctrlPressed) {
-      this.tales.forEach((tale) => {
-        this.moveTale(tale, this.mouse);
-      });
+    this.tales.forEach((tale) => {
+      this.moveTale(tale, this.mouse);
+    });
 
-      this.calculateCollisions();
-    // }
+    this.calculateCollisions();
 
     this.requestId = requestAnimationFrame(this.animate.bind(this));
   }
@@ -124,14 +119,6 @@ class Tale {
     this.mouse.x = opts.cx + opts.r * Math.cos(opts.angle);
     this.mouse.y = opts.cy + opts.r * Math.sin(opts.angle);
   }
-
-  // TODO:
-  // - Create class for Tale +
-  // - Create class for collision +
-  // - Add animation library +
-  // - Change Mouse circle radius on collision +
-  // - Jelly animation on collision +
-
 
   animScale(el) {
     TweenMax.to(el.el, 0.7, {
@@ -165,7 +152,6 @@ class Tale {
     let t = this;
     this.tales.forEach((tale, i) => {
       let state = t.getCollissionState(t.mouse, tale, i * -10);
-      // calculate grow step mouse.r / this.talse.length / 2
       if (state == CollisionState.IN) {
         t.mouse.scale += t.collision.step;
         t.animScale(t.mouse);
@@ -189,8 +175,6 @@ class Tale {
         } else if (state == CollisionState.OUT) {
           // this.animShake(tale1);
           // this.animShake(tale2);
-        } else {
-
         }
       }
     }
@@ -203,7 +187,6 @@ class Tale {
     if ( talesDistance <= collisionDistance && !this.collisions[index] ) {
         this.collisions[index] = true;
         state = CollisionState.IN;
-        // console.log(`Collision of ${i} and ${j}`);
     } else if (talesDistance > el2.r + el2.r && this.collisions[index] ) {
         this.collisions[index] = false;
         state = CollisionState.OUT;
@@ -307,14 +290,11 @@ class Tale {
     });
 
     this.el.addEventListener('mouseleave', e => {
-      // this.initializeCircles(getMousePos());
       this.iddle = true;
       this.iddleFrames = 0;
     });
 
     this.el.addEventListener('mouseenter', e => {
-      // this.initializeCircles(getMousePos());
-
       if (this.iddleFrames >= this.iddleFramesMax) {
         this.iddleFrames = 0;
         this.iddle = false;

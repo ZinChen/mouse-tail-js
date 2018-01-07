@@ -11,21 +11,6 @@ body
       filter#filter
         fegaussianblur(in='SourceGraphic', stddeviation='10', result='blur')
         fecolormatrix(in='blur', mode='matrix', values='1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7', result='filter')
-        //- fecomposite(in='SourceGraphic', in2='filter', operator='atop')
-        //- feBlend(in='SourceGraphic' in2='filter', operator='atop')
-        //- // border-area
-        //- feflood(flood-color='black', result='outside-color')
-        //- femorphology(in='SourceAlpha', operator='dilate', radius='1')
-        //- fecomposite(in='outside-color', operator='in', result='outside-stroke')
-        //- // fill-area
-        //- femorphology(in='SourceAlpha', operator='erode', radius='2')
-        //- fecomposite(in='SourceGraphic', operator='in', result='fill-area')
-        //- femerge
-        //-   femergenode(in='outside-stroke')
-        //-   femergenode(in='fill-area')
-
-
-
 
   .wrapper
     .mouse-circle(id="mouse-circle")
