@@ -58,6 +58,9 @@ class Tale {
     this.collision = {
       step: 0.5 / this.tales.length
     };
+    this.iddle = false;
+    this.iddleFramesMax = 30;
+    this.iddleFrames = 0;
   }
 
   initializeCircles(pos = null) {
@@ -70,6 +73,16 @@ class Tale {
   }
 
   animate() {
+    if (this.iddle) {
+      this.iddleFrames++;
+    }
+
+    if (this.iddleFrames > this.iddleFramesMax) {
+      cancelAnimationFrame(this.requestId);
+      this.requestId = null;
+      return;
+    }
+
     // if (this.ctrlPressed) {
       this.tales.forEach((tale) => {
         this.moveTale(tale, this.mouse);
@@ -250,15 +263,26 @@ class Tale {
     this.el.addEventListener('mousemove', e => {
       var mousepos = getMousePos();
       this.setCirclePos(this.mouse, mousepos);
+
+      if (this.requestId === null) {
+        this.iddleFrames = 0;
+        this.iddle = false;
+        this.requestId = requestAnimationFrame(
+          this.animate.bind(this)
+        );
+      }
     });
 
     this.el.addEventListener('mouseleave', e => {
       // this.initializeCircles(getMousePos());
-      cancelAnimationFrame(this.requestId);
+      this.iddle = true;
+      this.iddleFrames = 0;
     });
 
     this.el.addEventListener('mouseenter', e => {
       // this.initializeCircles(getMousePos());
+      this.iddle = false;
+      this.iddleFrames = 0;
       this.requestId = requestAnimationFrame(
         this.animate.bind(this)
       );
